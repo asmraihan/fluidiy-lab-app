@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const sql = neon(`${process.env.DATABASE_URL}`);
     const { name, email, clerkId } = await request.json();
-
+      console.log(name, email, clerkId)
     if (!name || !email || !clerkId) {
       return Response.json(
         { error: "Missing required fields" },

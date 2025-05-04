@@ -12,6 +12,16 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
       remove clerk package from package.json
       else   npm install --force
 
+
+
+          "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        },
+
    ```
 
 2. Start the app Works : npx expo start
