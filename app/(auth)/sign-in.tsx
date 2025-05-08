@@ -28,7 +28,7 @@ const SignIn = () => {
       if (signInAttempt.status === "complete") {
         console.log("Sign in complete terminal", signInAttempt);
         await setActive({ session: signInAttempt.createdSessionId });
-        router.replace("/(root)/index");
+        router.replace("/(root)/(tabs)/home"); /* FIXASM */
         // router.push("/(root)/(tabs)/home");
       } else {
         // See https://clerk.com/docs/custom-flows/error-handling for more info on error handling

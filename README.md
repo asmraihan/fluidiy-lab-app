@@ -13,7 +13,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
       else   npm install --force
 
 
-
+/* FIXASM */
           "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
