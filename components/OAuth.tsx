@@ -1,24 +1,58 @@
-import { useOAuth } from "@clerk/clerk-expo";
+import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
+import { useSSO } from '@clerk/clerk-expo';
 import { router } from "expo-router";
 import { Alert, Image, Text, View } from "react-native";
 
 import CustomButton from "@/components/CustomButton";
 import { icons } from "@/constants";
-import { googleOAuth } from "@/lib/auth";
+import { useCallback, useEffect } from 'react';
 
 const OAuth = () => {
-  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+  useEffect(() => {
+    // Preloads the browser for Android devices to reduce authentication load time
+    // See: https://docs.expo.dev/guides/authentication/#improving-user-experience
+    void WebBrowser.warmUpAsync();
+    return () => {
+      // Cleanup: closes browser when component unmounts
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
 
-  const handleGoogleSignIn = async () => {
-    const result = await googleOAuth(startOAuthFlow);
-    router.replace("/(root)/(tabs)/home"); /* FIXASM */
-    // if (result.code === "session_exists") {
-    //   Alert.alert("Success", "Session exists. Redirecting to home screen.");
-    //   router.replace("/(root)/(tabs)/home");
-    // }
+  // Handle any pending authentication sessions
+  WebBrowser.maybeCompleteAuthSession();
 
-    Alert.alert(result.success ? "Success" : "Error", result.message);
-  };
+  const { startSSOFlow } = useSSO();
+
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      // Start the authentication process by calling `startSSOFlow()`
+      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
+        strategy: 'oauth_google',
+        // For web, defaults to current path
+        // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
+        // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
+        redirectUrl: AuthSession.makeRedirectUri(),
+      });
+
+      // If sign in was successful, set the active session
+      if (createdSessionId) {
+        setActive!({ session: createdSessionId });
+        router.replace("/(root)/(tabs)/home"); // Redirect after successful login
+      } else {
+        // If there is no `createdSessionId`,
+        // there are missing requirements, such as MFA
+        // Use the `signIn` or `signUp` returned from `startSSOFlow`
+        // to handle next steps
+        Alert.alert("Error", "Additional steps are required to complete sign-in.");
+      }
+    } catch (err) {
+      // See https://clerk.com/docs/custom-flows/error-handling
+      // for more info on error handling
+      console.error(JSON.stringify(err, null, 2));
+      Alert.alert("Error", "An error occurred during sign-in. Please try again.");
+    }
+  }, [startSSOFlow]);
 
   return (
     <View>
