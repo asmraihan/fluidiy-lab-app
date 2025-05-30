@@ -1,20 +1,14 @@
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { Stack } from 'expo-router';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
-const Layout = () => {
+export default function AuthLayout() {
+  useFrameworkReady();
+  
   return (
-    <>
-      <StatusBar style="light"
-      backgroundColor="transparent"
-      translucent
-      />
-      <Stack>
-        <Stack.Screen name="welcome" options={{ headerShown: false }} />
-        <Stack.Screen name="sign-up" options={{ headerShown: false }} />
-        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-      </Stack>
-    </>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="onboarding" />
+      <Stack.Screen name="signin" />
+      <Stack.Screen name="signup" />
+    </Stack>
   );
-};
-
-export default Layout;
+}

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "fluidiy-lab-app",
-    "slug": "fluidiy-lab-app",
+    "name": "fluidiy-expo-tensorflow",
+    "slug": "fluidiy-expo-tensorflow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -11,27 +11,21 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
     "web": {
       "bundler": "metro",
-      "output": "server",
+        "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
+       "expo-router",
       [
     
         "expo-router",
         {
-          "origin": "https://uber.dev/"
+          "origin": "https://fluidiy.lab/"
         }
       ]
-    ],
+      , "expo-font", "expo-web-browser"],
     "experiments": {
       "typedRoutes": true,
       "reactCanary" : true

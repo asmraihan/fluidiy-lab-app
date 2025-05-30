@@ -1,58 +1,56 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import "../global.css";
-
-import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
-import { LogBox } from "react-native";
-import { tokenCache } from "@/lib/auth";
-
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-
-if (!publishableKey) {
-  throw new Error(
-    "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env",
-  );
-}
-
-LogBox.ignoreLogs(["Clerk:"]);
+import { Redirect, Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import * as SecureStore from 'expo-secure-store';
+import { useState } from 'react';
+import { Text, View } from 'react-native';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const isFrameworkReady = useFrameworkReady();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    let mounted = true;
 
-  if (!loaded) {
-    return null;
+    async function initialize() {
+      if (!isFrameworkReady || !mounted) return;
+
+      console.log('[Layout] Framework ready, checking auth...');
+      try {
+        const token = await SecureStore.getItemAsync('userToken');
+        console.log('[Layout] Token exists:', !!token);
+        if (mounted) {
+          setIsAuthenticated(!!token);
+        }
+      } catch (error) {
+        console.error('[Layout] Auth error:', error);
+        if (mounted) {
+          setError(error instanceof Error ? error.message : 'Unknown error');
+          setIsAuthenticated(false);
+        }
+      }
+    }
+
+    initialize();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isFrameworkReady]);
+
+  if (!isFrameworkReady || isAuthenticated === null) {
+    return null; // Let the splash screen handle the loading state
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <ClerkLoaded>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(root)/(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </ClerkLoaded>
-    </ClerkProvider>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+      {!isAuthenticated && <Redirect href="/onboarding" />}
+    </>
   );
 }
