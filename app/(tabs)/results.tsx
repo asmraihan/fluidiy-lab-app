@@ -17,16 +17,18 @@ export default function ResultsScreen() {
     addResultToHistory
   } = useAnalysis();
   const [selectedResult, setSelectedResult] = useState<AnalysisResult | null>(null);
+  const [analyzedImageUri, setAnalyzedImageUri] = useState<string | null>(null);
 
   useEffect(() => {
-    if (currentImage && !currentResult) {
+    if (currentImage && currentImage !== analyzedImageUri) {
       performAnalysis();
+      setAnalyzedImageUri(currentImage);
     } else if (currentResult && !selectedResult) {
       setSelectedResult(currentResult);
     } else if (historyResults.length > 0 && !selectedResult) {
       setSelectedResult(historyResults[0]);
     }
-  }, [currentImage, currentResult, historyResults]);
+  }, [currentImage]); // Only depend on currentImage changes
 
   const performAnalysis = async () => {
     if (!currentImage) return;
@@ -50,6 +52,7 @@ export default function ResultsScreen() {
   };
 
   const navigateToCamera = () => {
+    setAnalyzedImageUri(null); // Reset the analyzed image tracking
     router.push('/(tabs)/camera');
   };
 
@@ -75,153 +78,183 @@ export default function ResultsScreen() {
     }
   };
 
+  // Loading State
   if (isAnalyzing) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50">
+      <View className="flex-1 justify-center items-center bg-white">
         <ActivityIndicator size="large" color="#0078D7" />
-        <Text className="font-inter-medium text-lg text-gray-900 mt-4">
+        <Text className="font-inter-semibold text-xl text-gray-900 mt-6">
           Analyzing test strip...
         </Text>
-        <Text className="font-inter-regular text-sm text-gray-500 mt-2">
+        <Text className="font-inter-regular text-base text-gray-500 mt-2">
           This may take a few moments
         </Text>
       </View>
     );
   }
 
+  // Empty State
   if (!selectedResult && historyResults.length === 0) {
     return (
-      <View className="flex-1 justify-center items-center p-4 bg-gray-50">
-        <Text className="font-inter-bold text-xl text-gray-900 mb-2">
-          No Results Yet
-        </Text>
-        <Text className="font-inter-regular text-base text-gray-500 text-center mb-6">
-          Capture a test strip image to see your analysis results here.
-        </Text>
-        <TouchableOpacity 
-          className="flex-row items-center justify-center bg-blue-600 rounded-lg py-3 px-6"
-          onPress={navigateToCamera}
-        >
-          <Camera size={24} color="#FFFFFF" />
-          <Text className="font-inter-medium text-white text-base ml-2">
-            Capture Test Strip
+      <View className="flex-1 justify-center items-center p-6 bg-white">
+        <View className="bg-gray-50 p-8 rounded-2xl items-center max-w-sm w-full">
+          <Text className="font-inter-bold text-2xl text-gray-900 mb-3 text-center">
+            No Results Yet
           </Text>
-        </TouchableOpacity>
+          <Text className="font-inter-regular text-base text-gray-600 text-center mb-8">
+            Capture a test strip image to see your analysis results here.
+          </Text>
+          <TouchableOpacity 
+            className="flex-row items-center justify-center bg-blue-600 rounded-xl py-4 px-6 w-full"
+            onPress={navigateToCamera}
+          >
+            <Camera size={24} color="#FFFFFF" />
+            <Text className="font-inter-semibold text-white text-base ml-2">
+              Capture Test Strip
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
+  // Main Results View
   return (
     <View className="flex-1 bg-gray-50">
+      {/* History Strip */}
       {historyResults.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="bg-white p-4"
-        >
-          {historyResults.map((result) => {
-            const isSelected = selectedResult?.id === result.id;
-            const abnormalCount = result.parameters.filter(p => p.level !== 'normal').length;
-            
-            return (
+        <View className="bg-white border-b border-gray-200">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="py-4 px-4"
+          >
+            {historyResults.map((result) => (
               <TouchableOpacity
                 key={result.id}
-                className={`w-20 h-20 justify-center items-center rounded-lg mr-3 ${
-                  isSelected ? 'bg-blue-600' : 'bg-gray-200'
+                className={`mr-3 rounded-xl overflow-hidden ${
+                  selectedResult?.id === result.id 
+                    ? 'border-2 border-blue-600' 
+                    : 'border border-gray-200'
                 }`}
                 onPress={() => setSelectedResult(result)}
               >
-                <Text className="font-inter-regular text-xs text-gray-500">
-                  {new Date(result.date).toLocaleDateString()}
-                </Text>
-                {abnormalCount > 0 ? (
-                  <View className="absolute top-2 right-2 w-4 h-4 rounded-full bg-amber-500 justify-center items-center">
-                    <Text className="font-inter-bold text-[10px] text-white">
-                      {abnormalCount}
+                <Image
+                  source={{ uri: result.imageUri }}
+                  className="w-20 h-20"
+                  resizeMode="cover"
+                />
+                <View className={`absolute top-2 right-2 w-6 h-6 rounded-full 
+                  ${result.parameters.some(p => p.level !== 'normal') 
+                    ? 'bg-amber-500' 
+                    : 'bg-emerald-500'} 
+                  justify-center items-center`}>
+                  {result.parameters.some(p => p.level !== 'normal') ? (
+                    <Text className="font-inter-bold text-xs text-white">
+                      {result.parameters.filter(p => p.level !== 'normal').length}
                     </Text>
-                  </View>
-                ) : (
-                  <View className="absolute top-2 right-2 w-4 h-4 rounded-full bg-emerald-500 justify-center items-center">
-                    <Check size={12} color="#FFFFFF" />
-                  </View>
-                )}
+                  ) : (
+                    <Check size={14} color="#FFFFFF" />
+                  )}
+                </View>
               </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+            ))}
+          </ScrollView>
+        </View>
       )}
       
+      {/* Main Content */}
       {selectedResult && (
-        <ScrollView className="flex-1 bg-gray-50">
-          <View className="p-4">
-            <Text className="font-inter-regular text-sm text-gray-500">
+        <ScrollView className="flex-1">
+          {/* Header */}
+          <View className="bg-white p-6 border-b border-gray-200">
+            <Text className="font-inter-regular text-sm text-gray-500 mb-1">
               {new Date(selectedResult.date).toLocaleDateString()}{' '}
               {new Date(selectedResult.date).toLocaleTimeString()}
             </Text>
-            <Text className="font-inter-bold text-xl text-gray-900 mt-1">
+            <Text className="font-inter-bold text-2xl text-gray-900">
               Test Strip Analysis
             </Text>
           </View>
           
+          {/* Test Strip Image */}
           {selectedResult.imageUri && (
-            <View className="mx-4 h-[150px] bg-white rounded-lg overflow-hidden items-center justify-center">
+            <View className="m-6 bg-white rounded-xl overflow-hidden shadow-sm">
               <Image
                 source={{ uri: selectedResult.imageUri }}
-                className="w-full h-full"
-                resizeMode="contain"
+                className="w-full h-[200px]"
+                resizeMode="cover"
               />
             </View>
           )}
           
-          <View className="p-4">
-            <Text className="font-inter-bold text-lg text-gray-900 mb-4">
-              Results
+          {/* Results Grid */}
+          <View className="p-6">
+            <Text className="font-inter-bold text-xl text-gray-900 mb-4">
+              Parameters
             </Text>
             
-            {selectedResult.parameters.map((param) => (
-              <View key={param.name} className="bg-white rounded-lg p-4 mb-3 shadow-sm">
-                <View className="flex-row justify-between items-center mb-3">
-                  <Text className="font-inter-bold text-base text-gray-900">
-                    {param.name}
-                  </Text>
-                  <View className={`flex-row items-center rounded-full px-2 py-1 ${getStatusColor(param.level)}`}>
-                    {getStatusIcon(param.level)}
-                    <Text className={`font-inter-medium text-xs ml-1 ${getStatusColor(param.level)}`}>
-                      {param.level.charAt(0).toUpperCase() + param.level.slice(1)}
+            <View className="space-y-4">
+              {selectedResult.parameters.map((param) => (
+                <View key={param.name} 
+                  className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                  <View className="flex-row justify-between items-center mb-4">
+                    <Text className="font-inter-bold text-lg text-gray-900">
+                      {param.name}
                     </Text>
-                  </View>
-                </View>
-                
-                <View className="flex-row justify-between">
-                  <View className="flex-1">
-                    <Text className="font-inter-regular text-xs text-gray-500 mb-1">
-                      Result
-                    </Text>
-                    <Text className="font-inter-medium text-sm text-gray-900">
-                      {param.value} {param.unit}
-                    </Text>
+                    <View className={`flex-row items-center rounded-full px-3 py-1.5 
+                      ${param.level === 'normal' 
+                        ? 'bg-emerald-50' 
+                        : param.level === 'abnormal' 
+                          ? 'bg-amber-50' 
+                          : 'bg-red-50'}`}>
+                      {getStatusIcon(param.level)}
+                      <Text className={`font-inter-medium text-sm ml-1.5
+                        ${param.level === 'normal' 
+                          ? 'text-emerald-700' 
+                          : param.level === 'abnormal' 
+                            ? 'text-amber-700' 
+                            : 'text-red-700'}`}>
+                        {param.level.charAt(0).toUpperCase() + param.level.slice(1)}
+                      </Text>
+                    </View>
                   </View>
                   
-                  <View className="flex-1">
-                    <Text className="font-inter-regular text-xs text-gray-500 mb-1">
-                      Reference Range
-                    </Text>
-                    <Text className="font-inter-medium text-sm text-gray-900">
-                      {param.referenceRange}
-                    </Text>
+                  <View className="flex-row justify-between">
+                    <View className="flex-1 mr-4">
+                      <Text className="font-inter-medium text-sm text-gray-500 mb-1">
+                        Result
+                      </Text>
+                      <Text className="font-inter-bold text-xl text-gray-900">
+                        {param.value}
+                        <Text className="font-inter-regular text-base text-gray-600">
+                          {' '}{param.unit}
+                        </Text>
+                      </Text>
+                    </View>
+                    
+                    <View className="flex-1">
+                      <Text className="font-inter-medium text-sm text-gray-500 mb-1">
+                        Reference Range
+                      </Text>
+                      <Text className="font-inter-regular text-base text-gray-900">
+                        {param.referenceRange}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
           
-          <View className="p-4 pb-8">
+          {/* Action Button */}
+          <View className="p-6 pb-8">
             <TouchableOpacity 
-              className="flex-row items-center justify-center bg-blue-600 rounded-lg py-3 px-6"
+              className="flex-row items-center justify-center bg-blue-600 rounded-xl py-4 px-6 shadow-lg shadow-blue-600/30"
               onPress={navigateToCamera}
             >
               <Camera size={20} color="#FFFFFF" />
-              <Text className="font-inter-medium text-white text-base ml-2">
+              <Text className="font-inter-semibold text-white text-base ml-2">
                 New Analysis
               </Text>
             </TouchableOpacity>
