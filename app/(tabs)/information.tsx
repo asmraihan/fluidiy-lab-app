@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { ChevronDown, ChevronUp, Info, LogOut, User } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -187,52 +187,55 @@ export default function InformationScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView className="flex-1 bg-gray-50">
       {/* User Info Section */}
-      <View style={styles.userSection}>
-        <View style={styles.userInfo}>
-          <View style={styles.avatarPlaceholder}>
+      <View className="bg-white p-4 mb-4 flex-row justify-between items-center border-b border-gray-200">
+        <View className="flex-row items-center">
+          <View className="w-10 h-10 rounded-full bg-blue-50 justify-center items-center">
             <User size={24} color="#0078D7" />
           </View>
-          <View style={styles.userDetails}>
-            <Text style={styles.userName}>John Doe</Text>
-            <Text style={styles.userEmail}>john@example.com</Text>
+          <View className="ml-3">
+            <Text className="font-inter-medium text-base text-gray-900">John Doe</Text>
+            <Text className="font-inter-regular text-sm text-gray-500">john@example.com</Text>
           </View>
         </View>
         <TouchableOpacity 
-          style={styles.logoutButton}
+          className="flex-row items-center p-2 rounded-lg bg-red-50"
           onPress={handleLogout}
         >
           <LogOut size={20} color="#DC2626" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text className="font-inter-medium text-sm text-red-600 ml-1">Logout</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.header}>
-        <Text style={styles.title}>Understanding Urinalysis</Text>
-        <Text style={styles.subtitle}>
+      <View className="p-4 pb-2">
+        <Text className="font-inter-bold text-2xl text-gray-900 mb-2">
+          Understanding Urinalysis
+        </Text>
+        <Text className="font-inter-regular text-base text-gray-500 leading-6">
           Learn about test strip parameters and how to get accurate results
         </Text>
       </View>
       
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+      {/* Parameters Section */}
+      <View className="mb-6 px-4">
+        <View className="flex-row items-center mb-3">
           <Info size={20} color="#0078D7" />
-          <Text style={styles.sectionTitle}>Test Parameters</Text>
+          <Text className="font-inter-bold text-lg text-gray-900 ml-2">Test Parameters</Text>
         </View>
         
-        <Text style={styles.sectionDescription}>
+        <Text className="font-inter-regular text-sm text-gray-500 mb-4 leading-5">
           Urinalysis test strips measure multiple parameters that can indicate various health conditions. Tap each parameter to learn more.
         </Text>
         
         {parameterInfo.map((param, index) => (
-          <View key={index} style={styles.infoCard}>
+          <View key={index} className="bg-white rounded-lg mb-2 shadow-sm overflow-hidden">
             <TouchableOpacity
-              style={styles.infoHeader}
+              className="flex-row justify-between items-center p-4"
               onPress={() => toggleParam(index)}
               activeOpacity={0.7}
             >
-              <Text style={styles.infoTitle}>{param.name}</Text>
+              <Text className="font-inter-medium text-base text-gray-900">{param.name}</Text>
               {expandedParam === index ? (
                 <ChevronUp size={20} color="#64748B" />
               ) : (
@@ -241,19 +244,23 @@ export default function InformationScreen() {
             </TouchableOpacity>
             
             {expandedParam === index && (
-              <View style={styles.infoContent}>
-                <Text style={styles.infoText}>{param.description}</Text>
+              <View className="p-4 pt-0 border-t border-gray-200">
+                <Text className="font-inter-regular text-sm text-gray-500 leading-5 mb-3">
+                  {param.description}
+                </Text>
                 
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Normal Range:</Text>
-                  <Text style={styles.infoValue}>{param.normalRange}</Text>
+                <View className="flex-row items-center mb-3">
+                  <Text className="font-inter-medium text-sm text-gray-900">Normal Range:</Text>
+                  <Text className="font-inter-regular text-sm text-gray-500 ml-2">{param.normalRange}</Text>
                 </View>
                 
-                <Text style={styles.infoLabel}>Medical Implications:</Text>
+                <Text className="font-inter-medium text-sm text-gray-900 mb-2">Medical Implications:</Text>
                 {param.medicalImplications.map((implication, idx) => (
-                  <View key={idx} style={styles.bulletItem}>
-                    <View style={styles.bullet} />
-                    <Text style={styles.bulletText}>{implication}</Text>
+                  <View key={idx} className="flex-row mb-2 pl-2">
+                    <View className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 mr-2" />
+                    <Text className="font-inter-regular text-sm text-gray-500 flex-1 leading-5">
+                      {implication}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -261,21 +268,22 @@ export default function InformationScreen() {
           </View>
         ))}
       </View>
-      
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+
+      {/* FAQ Section */}
+      <View className="mb-6 px-4">
+        <View className="flex-row items-center mb-3">
           <Info size={20} color="#0078D7" />
-          <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+          <Text className="font-inter-bold text-lg text-gray-900 ml-2">Frequently Asked Questions</Text>
         </View>
         
         {faqItems.map((item, index) => (
-          <View key={index} style={styles.faqCard}>
+          <View key={index} className="bg-white rounded-lg mb-2 shadow-sm overflow-hidden">
             <TouchableOpacity
-              style={styles.faqQuestion}
+              className="flex-row justify-between items-center p-4"
               onPress={() => toggleFAQ(index)}
               activeOpacity={0.7}
             >
-              <Text style={styles.questionText}>{item.question}</Text>
+              <Text className="font-inter-medium text-base text-gray-900 flex-1">{item.question}</Text>
               {expandedFAQ === index ? (
                 <ChevronUp size={20} color="#64748B" />
               ) : (
@@ -284,299 +292,46 @@ export default function InformationScreen() {
             </TouchableOpacity>
             
             {expandedFAQ === index && (
-              <View style={styles.faqAnswer}>
-                <Text style={styles.answerText}>{item.answer}</Text>
+              <View className="p-4 pt-0 border-t border-gray-200">
+                <Text className="font-inter-regular text-sm text-gray-500 leading-5">{item.answer}</Text>
               </View>
             )}
           </View>
         ))}
       </View>
-      
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+
+      {/* Tips Section */}
+      <View className="mb-6 px-4">
+        <View className="flex-row items-center mb-3">
           <Info size={20} color="#0078D7" />
-          <Text style={styles.sectionTitle}>Test Accuracy Tips</Text>
+          <Text className="font-inter-bold text-lg text-gray-900 ml-2">Test Accuracy Tips</Text>
         </View>
         
-        <View style={styles.tipCard}>
-          <Text style={styles.tipTitle}>For best results:</Text>
+        <View className="bg-white rounded-lg p-4 shadow-sm">
+          <Text className="font-inter-medium text-base text-gray-900 mb-3">For best results:</Text>
           
-          <View style={styles.bulletItem}>
-            <View style={styles.bullet} />
-            <Text style={styles.bulletText}>
-              Use fresh test strips that haven't expired
-            </Text>
-          </View>
-          
-          <View style={styles.bulletItem}>
-            <View style={styles.bullet} />
-            <Text style={styles.bulletText}>
-              Ensure good, even lighting when capturing the image
-            </Text>
-          </View>
-          
-          <View style={styles.bulletItem}>
-            <View style={styles.bullet} />
-            <Text style={styles.bulletText}>
-              Position the strip within the guide marks on screen
-            </Text>
-          </View>
-          
-          <View style={styles.bulletItem}>
-            <View style={styles.bullet} />
-            <Text style={styles.bulletText}>
-              Wait the exact amount of time specified by your test strip manufacturer
-            </Text>
-          </View>
-          
-          <View style={styles.bulletItem}>
-            <View style={styles.bullet} />
-            <Text style={styles.bulletText}>
-              Avoid touching the test pads with your fingers
-            </Text>
-          </View>
-          
-          <View style={styles.bulletItem}>
-            <View style={styles.bullet} />
-            <Text style={styles.bulletText}>
-              Use a plain white background for better contrast
-            </Text>
-          </View>
+          {[
+            "Use fresh test strips that haven't expired",
+            "Ensure good, even lighting when capturing the image",
+            "Position the strip within the guide marks on screen",
+            "Wait the exact amount of time specified by your test strip manufacturer",
+            "Avoid touching the test pads with your fingers",
+            "Use a plain white background for better contrast"
+          ].map((tip, index) => (
+            <View key={index} className="flex-row mb-2 pl-2">
+              <View className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 mr-2" />
+              <Text className="font-inter-regular text-sm text-gray-500 flex-1 leading-5">{tip}</Text>
+            </View>
+          ))}
         </View>
       </View>
-      
-      <View style={styles.disclaimer}>
-        <Text style={styles.disclaimerText}>
+
+      {/* Disclaimer */}
+      <View className="p-4 mb-8">
+        <Text className="font-inter-regular text-xs text-gray-400 text-center leading-[18px]">
           DISCLAIMER: This app is designed for informational purposes only and is not intended to replace professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for medical concerns.
         </Text>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA',
-  },
-  header: {
-    padding: 16,
-    paddingBottom: 8,
-  },
-  title: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 24,
-    color: '#0F172A',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
-    color: '#64748B',
-    lineHeight: 24,
-  },
-  section: {
-    marginBottom: 24,
-    paddingHorizontal: 16,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 18,
-    color: '#0F172A',
-    marginLeft: 8,
-  },
-  sectionDescription: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: '#64748B',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  infoCard: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-    overflow: 'hidden',
-  },
-  infoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  infoTitle: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: '#0F172A',
-  },
-  infoContent: {
-    padding: 16,
-    paddingTop: 0,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-  },
-  infoText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: '#64748B',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  infoLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: '#0F172A',
-    marginBottom: 8,
-  },
-  infoValue: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: '#64748B',
-    marginLeft: 8,
-  },
-  bulletItem: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    paddingLeft: 8,
-  },
-  bullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#0078D7',
-    marginTop: 6,
-    marginRight: 8,
-  },
-  bulletText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: '#64748B',
-    flex: 1,
-    lineHeight: 20,
-  },
-  faqCard: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-    overflow: 'hidden',
-  },
-  faqQuestion: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  questionText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: '#0F172A',
-    flex: 1,
-  },
-  faqAnswer: {
-    padding: 16,
-    paddingTop: 0,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-  },
-  answerText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: '#64748B',
-    lineHeight: 20,
-  },
-  tipCard: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  tipTitle: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: '#0F172A',
-    marginBottom: 12,
-  },
-  disclaimer: {
-    padding: 16,
-    marginBottom: 32,
-  },
-  disclaimerText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: '#94A3B8',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  userSection: {
-    backgroundColor: 'white',
-    padding: 16,
-    marginBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0F9FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  userDetails: {
-    marginLeft: 12,
-  },
-  userName: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: '#0F172A',
-  },
-  userEmail: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: '#64748B',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#FEE2E2',
-  },
-  logoutText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: '#DC2626',
-    marginLeft: 4,
-  },
-});

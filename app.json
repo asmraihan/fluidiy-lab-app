@@ -24,6 +24,13 @@
         {
           "origin": "https://fluidiy.lab/"
         }
+        
+      ],
+        [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you pick image from gallery."
+        }
       ]
       , "expo-font", "expo-web-browser"],
     "experiments": {

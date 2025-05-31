@@ -1,103 +1,39 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { ArrowDown } from 'lucide-react-native';
 
 export const TestStripGuide = () => {
   return (
-    <View style={styles.guideContainer}>
-      <View style={styles.topSection}>
-        <Text style={styles.guideText}>
+    <View className="absolute w-full h-full justify-between items-center bg-black/30">
+      <View className="w-full items-center p-4 mt-12">
+        <Text className="font-inter-bold text-white text-lg text-center shadow-text">
           Align test strip within the markers
         </Text>
       </View>
       
-      <View style={styles.guideFrame}>
-        <View style={styles.corner} />
-        <View style={styles.corner} />
-        <View style={styles.corner} />
-        <View style={styles.corner} />
+      <View className="w-4/5 h-1/2 border-2 border-white/70 rounded-xl justify-center items-center relative ">
+        {/* Top Left Corner */}
+        <View className="absolute top-0 left-0 w-5 h-5 border-blue-600 border-3" />
+        {/* Top Right Corner */}
+        <View className="absolute top-0 right-0 w-5 h-5 border-blue-600 border-3" />
+        {/* Bottom Left Corner */}
+        <View className="absolute bottom-0 left-0 w-5 h-5 border-blue-600 border-3" />
+        {/* Bottom Right Corner */}
+        <View className="absolute bottom-0 right-0 w-5 h-5 border-blue-600 border-3" />
         
-        <View style={styles.centerGuide}>
+        <View className="items-center opacity-70">
           <ArrowDown size={32} color="#FFFFFF" />
-          <Text style={styles.centerText}>Center Strip Here</Text>
+          <Text className="font-inter-medium text-white text-base mt-2 shadow-text">
+            Center Strip Here
+          </Text>
         </View>
       </View>
       
-      <View style={styles.bottomSection}>
-        <Text style={styles.infoText}>
+      <View className="w-full items-center p-4 mb-28">
+        <Text className="font-inter-regular text-white text-sm text-center shadow-text">
           Ensure good lighting and keep strip flat
         </Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  guideContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  topSection: {
-    width: '100%',
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 20,
-  },
-  guideText: {
-    fontFamily: 'Inter-Bold',
-    color: 'white',
-    fontSize: 18,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  guideFrame: {
-    width: '80%',
-    height: '50%',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  corner: {
-    position: 'absolute',
-    width: 20,
-    height: 20,
-    borderColor: '#0078D7',
-    borderWidth: 3,
-  },
-  centerGuide: {
-    alignItems: 'center',
-  },
-  centerText: {
-    fontFamily: 'Inter-Medium',
-    color: 'white',
-    fontSize: 16,
-    marginTop: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  bottomSection: {
-    width: '100%',
-    alignItems: 'center',
-    padding: 16,
-    marginBottom: 120,
-  },
-  infoText: {
-    fontFamily: 'Inter-Regular',
-    color: 'white',
-    fontSize: 14,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-});
