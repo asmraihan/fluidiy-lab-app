@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: 'fluidiy-lab-app',
   slug: 'fluidiy-lab-app',
   extra: {
-    DATABASE_URL: process.env.DATABASE_URL,
-    JWT_SECRET: process.env.JWT_SECRET,
+    EXPO_PUBLIC_DATABASE_URL: process.env.EXPO_PUBLIC_DATABASE_URL,
+    EXPO_PUBLIC_JWT_SECRET: process.env.EXPO_PUBLIC_JWT_SECRET,
   },
 });

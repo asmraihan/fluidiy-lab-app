@@ -2,13 +2,13 @@ import { neon } from "@neondatabase/serverless";
 import bcrypt from 'bcryptjs';
 import * as Crypto from 'expo-crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.EXPO_PUBLIC_JWT_SECRET || 'your-secret-key';
 
 export async function POST(request: Request) {
     console.log("Received request for user API");
   try {
     const { action, ...body } = await request.json();
-    const sql = neon(process.env.DATABASE_URL || 'postgres://neondb_owner:npg_9VYGoTxDI8ek@ep-autumn-feather-a224j5sc-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require');
+    const sql = neon(process.env.EXPO_PUBLIC_DATABASE_URL || '');
 
     // Handle signup
     if (action === 'signup') {

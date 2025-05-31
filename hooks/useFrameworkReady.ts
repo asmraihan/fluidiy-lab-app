@@ -8,7 +8,6 @@ export function useFrameworkReady() {
   useEffect(() => {
     async function prepare() {
       try {
-        console.log(process.env.DATABASE_URL, 'Database URL');
         console.log('[Framework] Initializing...');
         await SplashScreen.preventAutoHideAsync();
         

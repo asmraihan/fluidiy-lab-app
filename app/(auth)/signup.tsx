@@ -6,7 +6,7 @@ import { ReactNativeModal } from "react-native-modal";
 import InputField from "@/components/ui/InputField";
 import CustomButton from "@/components/ui/CustomButton";
 import { fetchAPI } from "@/lib/fetch";
-
+import  config  from "@/app.config";
 export default function SignUpScreen() {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -53,6 +53,13 @@ export default function SignUpScreen() {
     }
   };
 
+  const handleChange = (name: string, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 p-6  mt-20">
@@ -64,12 +71,12 @@ export default function SignUpScreen() {
           <Text className="font-inter-regular text-error mb-4">{error} asd</Text>
         ) : null}
 
-        <View className="space-y-4">
+        <View className="">
           <InputField
             label="Email"
             placeholder="Enter email"
             value={form.email}
-            onChangeText={(value) => setForm({ ...form, email: value })}
+            onChangeText={(value) => handleChange('email', value)}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -78,7 +85,7 @@ export default function SignUpScreen() {
             label="Password"
             placeholder="Enter password"
             value={form.password}
-            onChangeText={(value) => setForm({ ...form, password: value })}
+            onChangeText={(value) => handleChange('password', value)}
             secureTextEntry
           />
 

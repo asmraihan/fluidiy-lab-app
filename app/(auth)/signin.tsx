@@ -52,6 +52,13 @@ export default function SignInScreen() {
     }
   };
 
+  const handleChange = (name: string, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 p-6 mt-20">
@@ -63,22 +70,28 @@ export default function SignInScreen() {
           <Text className="font-inter-regular text-error mb-4">{error}</Text>
         ) : null}
 
-        <View className="space-y-4">
+        <View className="">
           <InputField
             label="Email"
             placeholder="Enter email"
             value={form.email}
-            onChangeText={(value) => setForm({ ...form, email: value })}
+            onChangeText={(value) => handleChange('email', value)}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
+            importantForAutofill="yes"
           />
 
           <InputField
             label="Password"
             placeholder="Enter password"
             value={form.password}
-            onChangeText={(value) => setForm({ ...form, password: value })}
+            onChangeText={(value) => handleChange('password', value)}
             secureTextEntry
+            autoComplete="password"
+            textContentType="password"
+            importantForAutofill="yes"
           />
 
           <CustomButton

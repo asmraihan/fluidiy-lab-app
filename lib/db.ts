@@ -4,8 +4,8 @@ import bcrypt from 'bcryptjs';
 import * as Crypto from 'expo-crypto';
 
 
-const sql = neon(`postgres://neondb_owner:npg_9VYGoTxDI8ek@ep-autumn-feather-a224j5sc-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require`);
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const sql = neon(process.env.EXPO_PUBLIC_DATABASE_URL || '');
+const JWT_SECRET = process.env.EXPO_PUBLIC_JWT_SECRET || 'your-secret-key';
 console.log(sql, 'SQL Client Initialized');
 
 export const UserSchema = z.object({
