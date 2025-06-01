@@ -5,6 +5,7 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
+import { UserProvider } from '@/context/UserContext';
 
 export default function RootLayout() {
   const isFrameworkReady = useFrameworkReady();
@@ -45,12 +46,14 @@ export default function RootLayout() {
   }
 
   return (
-    <>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-      {!isAuthenticated && <Redirect href="/onboarding" />}
-    </>
+    <UserProvider>
+      <>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+        {!isAuthenticated && <Redirect href="/onboarding" />}
+      </>
+    </UserProvider>
   );
 }

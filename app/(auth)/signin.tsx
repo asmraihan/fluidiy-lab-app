@@ -6,9 +6,11 @@ import { ReactNativeModal } from "react-native-modal";
 import InputField from "@/components/ui/InputField";
 import CustomButton from "@/components/ui/CustomButton";
 import { fetchAPI } from "@/lib/fetch";
+import { useUser } from '@/context/UserContext';
 
 export default function SignInScreen() {
   const router = useRouter();
+    const { setUser } = useUser();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -41,8 +43,16 @@ export default function SignInScreen() {
       if (!response.token) {
         throw new Error('No token received');
       }
-
+      // Store token and user data
       await SecureStore.setItemAsync('userToken', response.token);
+      await SecureStore.setItemAsync('userData', JSON.stringify(response.user));
+      
+      // Update user context
+      setUser({
+        ...response.user,
+        token: response.token
+      });
+  
       router.replace('/(tabs)');
     } catch (error) {
       console.log('[SignIn] Error:', error);

@@ -7,8 +7,11 @@ import InputField from "@/components/ui/InputField";
 import CustomButton from "@/components/ui/CustomButton";
 import { fetchAPI } from "@/lib/fetch";
 import  config  from "@/app.config";
+import { useUser } from '@/context/UserContext';
+
 export default function SignUpScreen() {
   const router = useRouter();
+  const { setUser } = useUser();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -33,7 +36,7 @@ export default function SignUpScreen() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'signup', // Add this line
+          action: 'signup',
           email: form.email,
           password: form.password,
         }),
@@ -43,7 +46,16 @@ export default function SignUpScreen() {
         throw new Error('No token received');
       }
 
+      // Store token and user data
       await SecureStore.setItemAsync('userToken', response.token);
+      await SecureStore.setItemAsync('userData', JSON.stringify(response.user));
+      
+      // Update user context
+      setUser({
+        ...response.user,
+        token: response.token
+      });
+
       setShowSuccessModal(true);
     } catch (error) {
       console.log('[SignUp] Error:', error);

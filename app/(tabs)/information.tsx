@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { ChevronDown, ChevronUp, Info, LogOut, User } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { useUser } from '@/context/UserContext';
 
 type FAQItem = {
   question: string;
@@ -18,29 +19,11 @@ type ParameterInfo = {
 
 export default function InformationScreen() {
   const router = useRouter();
+    const { user, logout } = useUser();
+    console.log('[Information] User:', user);
+
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [expandedParam, setExpandedParam] = useState<number | null>(null);
-
-  const handleLogout = useCallback(async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            await SecureStore.deleteItemAsync('userToken');
-            router.replace('/signin');
-          }
-        }
-      ]
-    );
-  }, [router]);
 
   const toggleFAQ = (index: number) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
@@ -195,13 +178,13 @@ export default function InformationScreen() {
             <User size={24} color="#0078D7" />
           </View>
           <View className="ml-3">
-            <Text className="font-inter-medium text-base text-gray-900">John Doe</Text>
-            <Text className="font-inter-regular text-sm text-gray-500">john@example.com</Text>
+            <Text className="font-inter-medium text-base text-gray-900">{user?.name ?? "User"}</Text>
+            <Text className="font-inter-regular text-sm text-gray-500">{user?.email}</Text>
           </View>
         </View>
         <TouchableOpacity 
           className="flex-row items-center p-2 rounded-lg bg-red-50"
-          onPress={handleLogout}
+          onPress={logout}
         >
           <LogOut size={20} color="#DC2626" />
           <Text className="font-inter-medium text-sm text-red-600 ml-1">Logout</Text>
@@ -231,7 +214,7 @@ export default function InformationScreen() {
         {parameterInfo.map((param, index) => (
           <View key={index} className="bg-white rounded-lg mb-2 shadow-sm overflow-hidden">
             <TouchableOpacity
-              className="flex-row justify-between items-center p-4"
+              className="flex-row justify-between items-center px-4 py-3"
               onPress={() => toggleParam(index)}
               activeOpacity={0.7}
             >
@@ -244,7 +227,7 @@ export default function InformationScreen() {
             </TouchableOpacity>
             
             {expandedParam === index && (
-              <View className="p-4 pt-0 border-t border-gray-200">
+              <View className="p-4 pt-2 border-t border-gray-200">
                 <Text className="font-inter-regular text-sm text-gray-500 leading-5 mb-3">
                   {param.description}
                 </Text>
@@ -279,7 +262,7 @@ export default function InformationScreen() {
         {faqItems.map((item, index) => (
           <View key={index} className="bg-white rounded-lg mb-2 shadow-sm overflow-hidden">
             <TouchableOpacity
-              className="flex-row justify-between items-center p-4"
+              className="flex-row justify-between items-center px-4 py-3"
               onPress={() => toggleFAQ(index)}
               activeOpacity={0.7}
             >
@@ -292,7 +275,7 @@ export default function InformationScreen() {
             </TouchableOpacity>
             
             {expandedFAQ === index && (
-              <View className="p-4 pt-0 border-t border-gray-200">
+              <View className="p-4 pt-2 border-t border-gray-200">
                 <Text className="font-inter-regular text-sm text-gray-500 leading-5">{item.answer}</Text>
               </View>
             )}
