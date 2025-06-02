@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, ArrowLeft, Camera, Check } from 'lucide-react-native';
+import { AlertTriangle, ArrowLeft, Camera, Check, Trash2 } from 'lucide-react-native';
 import { useAnalysis, AnalysisResult, ParameterResult } from '@/context/AnalysisContext';
 import { analyzeImage } from '@/utils/colorAnalysis';
+import { useUser } from '@/context/UserContext';
+import * as FileSystem from 'expo-file-system';
+
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -14,8 +17,10 @@ export default function ResultsScreen() {
     currentResult,
     setCurrentResult,
     historyResults,
-    addResultToHistory
+    addResultToHistory,
+    deleteResult 
   } = useAnalysis();
+  const { user } = useUser();
   const [selectedResult, setSelectedResult] = useState<AnalysisResult | null>(null);
   const [analyzedImageUri, setAnalyzedImageUri] = useState<string | null>(null);
 
@@ -31,21 +36,29 @@ export default function ResultsScreen() {
   }, [currentImage]); // Only depend on currentImage changes
 
   const performAnalysis = async () => {
-    if (!currentImage) return;
+    if (!currentImage || !user?.id) return;
     
     setIsAnalyzing(true);
     try {
-      // Simulate analysis delay for UI feedback
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const base64Image = await FileSystem.readAsStringAsync(currentImage, {
+        encoding: FileSystem.EncodingType.Base64
+      });
       
-      // Real analysis would happen here using TensorFlow.js
       const result = await analyzeImage(currentImage);
       
+      // Save result to database with base64 image
+      await addResultToHistory({
+        userId: Number(user.id), // Convert to number
+        date: new Date(),
+        imageUri: `data:image/jpeg;base64,${base64Image}`,
+        parameters: result.parameters
+      });
+      
       setCurrentResult(result);
-      addResultToHistory(result);
       setSelectedResult(result);
     } catch (error) {
       console.error('Analysis error:', error);
+      Alert.alert('Error', 'Failed to analyze image');
     } finally {
       setIsAnalyzing(false);
     }
@@ -76,6 +89,39 @@ export default function ResultsScreen() {
       default:
         return null;
     }
+  };
+
+  const handleDelete = (result: AnalysisResult) => {
+    if (!user?.id || !result.id) return;
+
+    Alert.alert(
+      "Delete Result",
+      "Are you sure you want to delete this analysis result? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteResult(Number(result.id));
+              
+              // Update selected result after successful deletion
+              if (selectedResult?.id === result.id) {
+                const nextResult = historyResults.find(r => r.id !== result.id);
+                setSelectedResult(nextResult || null);
+              }
+            } catch (error) {
+              console.error('Error in handleDelete:', error);
+              Alert.alert('Error', 'Failed to delete result. Please try again.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   // Loading State
@@ -130,34 +176,41 @@ export default function ResultsScreen() {
             className="py-4 px-4"
           >
             {historyResults.map((result) => (
-              <TouchableOpacity
-                key={result.id}
-                className={`mr-3 rounded-xl overflow-hidden ${
-                  selectedResult?.id === result.id 
-                    ? 'border-2 border-blue-600' 
-                    : 'border border-gray-200'
-                }`}
-                onPress={() => setSelectedResult(result)}
-              >
-                <Image
-                  source={{ uri: result.imageUri }}
-                  className="w-20 h-20"
-                  resizeMode="cover"
-                />
-                <View className={`absolute top-2 right-2 w-6 h-6 rounded-full 
-                  ${result.parameters.some(p => p.level !== 'normal') 
-                    ? 'bg-amber-500' 
-                    : 'bg-emerald-500'} 
-                  justify-center items-center`}>
-                  {result.parameters.some(p => p.level !== 'normal') ? (
-                    <Text className="font-inter-bold text-xs text-white">
-                      {result.parameters.filter(p => p.level !== 'normal').length}
-                    </Text>
-                  ) : (
-                    <Check size={14} color="#FFFFFF" />
-                  )}
-                </View>
-              </TouchableOpacity>
+              <View key={`result-${result.id}`} className="mr-3">
+                <TouchableOpacity
+                  className={`rounded-xl overflow-hidden ${
+                    selectedResult?.id === result.id 
+                      ? 'border-2 border-blue-600' 
+                      : 'border border-gray-200'
+                  }`}
+                  onPress={() => setSelectedResult(result)}
+                >
+                  <Image
+                    source={{ uri: result.imageUri }}
+                    className="w-20 h-20"
+                    resizeMode="cover"
+                  />
+                  <View className={`absolute top-2 right-2 w-6 h-6 rounded-full 
+                    ${result.parameters.some(p => p.level !== 'normal') 
+                      ? 'bg-amber-500' 
+                      : 'bg-emerald-500'} 
+                    justify-center items-center`}>
+                    {result.parameters.some(p => p.level !== 'normal') ? (
+                      <Text className="font-inter-bold text-xs text-white">
+                        {result.parameters.filter(p => p.level !== 'normal').length}
+                      </Text>
+                    ) : (
+                      <Check size={14} color="#FFFFFF" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleDelete(result)}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full items-center justify-center"
+                >
+                  <Trash2 size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
             ))}
           </ScrollView>
         </View>
@@ -168,13 +221,23 @@ export default function ResultsScreen() {
         <ScrollView className="flex-1">
           {/* Header */}
           <View className="bg-white p-6 border-b border-gray-200">
-            <Text className="font-inter-regular text-sm text-gray-500 mb-1">
-              {new Date(selectedResult.date).toLocaleDateString()}{' '}
-              {new Date(selectedResult.date).toLocaleTimeString()}
-            </Text>
-            <Text className="font-inter-bold text-2xl text-gray-900">
-              Test Strip Analysis
-            </Text>
+            <View className="flex-row justify-between items-center">
+              <View>
+                <Text className="font-inter-regular text-sm text-gray-500 mb-1">
+                  {new Date(selectedResult.date).toLocaleDateString()}{' '}
+                  {new Date(selectedResult.date).toLocaleTimeString()}
+                </Text>
+                <Text className="font-inter-bold text-2xl text-gray-900">
+                  Test Strip Analysis
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleDelete(selectedResult)}
+                className="p-2"
+              >
+                <Trash2 size={20} color="#EF4444" />
+              </TouchableOpacity>
+            </View>
           </View>
           
           {/* Test Strip Image */}

@@ -21,7 +21,7 @@ export default function HomeScreen() {
 
       <View className="mx-4 rounded-xl overflow-hidden h-48 mb-6">
         <Image
-          source={{ uri: 'https://images.pexels.com/photos/6823547/pexels-photo-6823547.jpeg' }}
+          source={{ uri: 'https://images.pexels.com/photos/4226119/pexels-photo-4226119.jpeg' }}
           className="w-full h-full"
           resizeMode="cover"
         />
